@@ -7,7 +7,7 @@
 
         <div class="row">
 
-            <div class="col-md-12">
+            <div class="col-md-10">
                 @forelse ($posts as $post)
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -51,7 +51,7 @@
                 </div>
 
             </div>
-
-        </dev>
-    </dev>
+            @include('frontend.recomendation')
+        </div>
+    </div>
 @endsection

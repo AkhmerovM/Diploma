@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use predictionio\EngineClient;
 
 class BlogController extends Controller
 {
@@ -11,14 +14,31 @@ class BlogController extends Controller
     {
         $posts = Post::when($request->search, function($query) use($request) {
                         $search = $request->search;
-                        
+
                         return $query->where('title', 'like', "%$search%")
                             ->orWhere('body', 'like', "%$search%");
                     })->with('tags', 'category', 'user')
                     ->withCount('comments')
                     ->published()
                     ->simplePaginate(5);
+        $engineClient = new EngineClient('http://localhost:8000');
 
+        if (Auth::check())
+        {
+                    $recomendationPosts = $engineClient->sendQuery(array('user'=> Auth::id(), 'num'=> 3));
+        } else {
+            $currentUser = User::where('ipAddress', $request->getClientIp())->first();
+            if ($currentUser) {
+
+            } else {
+                $user = new User();
+                $user->ipAddress = $request->getClientIp();
+                $user->save();
+                $currentUser = $user;
+            }
+            print_r($currentUser);
+            $recomendationPosts = $engineClient->sendQuery(array('user'=> $currentUser->id, 'num'=> 3));
+        }
         return view('frontend.index', compact('posts'));
     }
 
