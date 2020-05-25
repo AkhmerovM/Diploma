@@ -20,5 +20,8 @@ class CategoriesTableSeeder extends Seeder
         Category::create([
             'name'     => 'web',
         ]);
+        Category::create([
+            'name'     => 'Programming languages',
+        ]);
     }
 }

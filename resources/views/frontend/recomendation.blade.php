@@ -1,8 +1,13 @@
             <div class="col-md-2">
                 <h3>Рекомендации</h3>
-                @forelse ($posts as $post)
-                    <div class="panel panel-default">
-
+                @forelse ($recomendationPosts as $post)
+                    <div class="panel panel-default tac">
+                        <a href="/posts/{{$post->id}}">
+                            {{ $post->title }}
+                        </a>
+                        <div>
+                            <small>by {{ $post->user->name }}</small>
+                            </div>
                     </div>
                 @empty
                     <div class="panel panel-default">

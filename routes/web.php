@@ -13,6 +13,7 @@
 
 Route::get('/', 'BlogController@index')->middleware('getRecomendationPosts');
 Route::get('/posts/{post}', 'BlogController@post')->middleware('setShownPost');
+Route::post('/posts/{post}', 'BlogController@sendShownPost')->middleware('setShownPost');
 Route::post('/posts/{post}/comment', 'BlogController@comment')->middleware('auth');
 
 Auth::routes();

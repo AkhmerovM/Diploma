@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Middleware;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use predictionio\EventClient;
 
@@ -17,19 +18,30 @@ class SetShownPost
      */
     public function handle($request, Closure $next)
     {
-        $client = new EventClient('b_FqHcqdizerPne6qDgqRQB-9GVnJ1pcP-8ejsNoQ5P4mdqq26S63SVD0JbLeIC-', 'http://0.0.0.0:7070/');
-//        var_dump($request->getClientIp());die();
-//        print_r($request->getUser());
-//        $response = $client->createEvent(array(
-//        'event' => 'rate',
-//        'entityType' => 'user',
-//        'entityId' => 11,
-//        'targetEntityType' => 'item',
-//        'targetEntityId' => 52,
-//        'properties' => array('rating'=> 4)
-//));
-
-//        print_r($response);die();
+        $client = new EventClient('lMIAHhBrJBBL7owDaivnBTlJcVUGGWVmH7-e0ZVXlttMZWy0lLE7mpblqn1LcW-l', 'http://0.0.0.0:7070/');
+        if (Auth::check()) {
+            $id       = Auth::id();
+            $url      = $request->url();
+            $urlItems = array_reverse(explode('/', $url));
+            $postId   = null;
+            if ($urlItems[1] === 'posts') {
+                $postId = $urlItems[0];
+            }
+            $value = 4;
+            if ($request->method() === 'POST') {
+                $value = 8;
+            }
+            if ($id && $postId) {
+                $response = $client->createEvent([
+                    'event'            => 'rate',
+                    'entityType'       => 'user',
+                    'entityId'         => $id,
+                    'targetEntityType' => 'item',
+                    'targetEntityId'   => $postId,
+                    'properties'       => ['rating' => $value]
+                ]);
+            }
+        }
         return $next($request);
     }
 }

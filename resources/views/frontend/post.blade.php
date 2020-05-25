@@ -26,6 +26,7 @@
                             @endforelse
                         </p>
                     </div>
+                    <div class="panel-end j-panel-end" />
                 </div>
 
                 @includeWhen(Auth::user(), 'frontend._form')

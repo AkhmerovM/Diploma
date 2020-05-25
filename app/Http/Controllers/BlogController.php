@@ -12,6 +12,8 @@ class BlogController extends Controller
 {
     public function index(Request $request)
     {
+        $recomendationPosts = [];
+
         $posts = Post::when($request->search, function($query) use($request) {
                         $search = $request->search;
 
@@ -22,26 +24,50 @@ class BlogController extends Controller
                     ->published()
                     ->simplePaginate(5);
         $engineClient = new EngineClient('http://localhost:8000');
-
+        $recomendation = $engineClient->sendQuery(array('user'=> Auth::id(), 'num'=> 3));
         if (Auth::check())
         {
-                    $recomendationPosts = $engineClient->sendQuery(array('user'=> Auth::id(), 'num'=> 3));
-        } else {
-            $currentUser = User::where('ipAddress', $request->getClientIp())->first();
-            if ($currentUser) {
-
-            } else {
-                $user = new User();
-                $user->ipAddress = $request->getClientIp();
-                $user->save();
-                $currentUser = $user;
+            $recomendationPosts = [];
+            foreach ($recomendation['itemScores'] as $item) {
+                $post = Post::all()->where('id', $item['item'])->first();
+                if ($item['item'] && $post) {
+                    array_push($recomendationPosts, $post);
+                }
             }
-            print_r($currentUser);
-            $recomendationPosts = $engineClient->sendQuery(array('user'=> $currentUser->id, 'num'=> 3));
+        } else {
+            $handle = fopen("sample_movielens_data.txt.save", "r");
+            $data = [];
+            if ($handle) {
+                while (($line = fgets($handle)) !== false) {
+                    // process the line read.
+                    $raw = explode("::", $line);
+                    $postId = $raw[1];
+                    if (!isset($data[$postId])) {
+                        $data[$postId] = 1;
+                    } else {
+                        $data[$postId] = $data[$postId] + 1;
+                    }
+                }
+                fclose($handle);
+            } else {
+                // error opening the file.
+            }
+            if (count($data)) {
+                asort($data);
+                $result = array_slice($data, -3, 3, true);
+                foreach ($result as $key => $value) {
+                    $post = Post::all()->where('id', $key)->first();
+                    if ($post) {
+                        array_push($recomendationPosts, $post);
+                    }
+                }
+            }
         }
-        return view('frontend.index', compact('posts'));
+        return view('frontend.index', ['posts' => $posts, 'recomendationPosts' => $recomendationPosts]);
     }
-
+    public function sendShownPost() {
+        return null;
+    }
     public function post(Post $post)
     {
         $post = $post->load(['comments.user', 'tags', 'user', 'category']);
