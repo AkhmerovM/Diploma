@@ -10969,88 +10969,124 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.select2-tags').select2({ tags: 
 __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#flash-overlay-modal').modal();
 
 var laravel = {
-  initialize: function initialize() {
-    this.methodLinks = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('a[data-method]');
-    this.token = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('a[data-token]');
-    this.registerEvents();
-  },
+    initialize: function initialize() {
+        this.methodLinks = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('a[data-method]');
+        this.token = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('a[data-token]');
+        this.registerEvents();
+    },
 
-  registerEvents: function registerEvents() {
-    this.methodLinks.on('click', this.handleMethod);
-    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).scroll(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.debounce(this.checkScroll, 1000));
-    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).ready(this.checkScroll);
-  },
-  checkScroll: function checkScroll() {
-    if (__WEBPACK_IMPORTED_MODULE_0_jquery___default()('.j-panel-end').length) {
-      var hT = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.j-panel-end').offset().top,
-          hH = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.j-panel-end').outerHeight(),
-          wH = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).height(),
-          wS = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(this).scrollTop();
-      if (wS > hT + hH - wH) {
-        __WEBPACK_IMPORTED_MODULE_0_jquery___default.a.ajax({
-          type: 'POST',
-          data: 'da',
-          headers: {
-            'X-CSRF-TOKEN': __WEBPACK_IMPORTED_MODULE_0_jquery___default()('meta[name="csrf-token"]').attr('content')
-          }
-        }).done(function (data) {
-          console.log('suc');
-          console.log(data);
-        }).fail(function (data) {
-          console.log('fail');
-          console.log(data);
+    registerEvents: function registerEvents() {
+        this.methodLinks.on('click', this.handleMethod);
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).scroll(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.debounce(this.checkScroll, 1000));
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).ready(this.checkScroll);
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).off('click').on('click', '.star-svg__svg', this.starClick);
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.star-svg').off('mouseover').on('mouseover', this.starMove).off('mouseleave').on('mouseout', this.starMove);
+    },
+    starMove: function starMove(e) {
+        var $target = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(e.target);
+        var $container = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.star-svg');
+        var elements = $container.children();
+        if ($target.hasClass('star-svg__svg')) {
+            elements.each(function (element) {
+                __WEBPACK_IMPORTED_MODULE_0_jquery___default()(elements[element]).removeClass('hover');
+            });
+            var count = $target.data('id');
+            var $value = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.star-svg__value');
+            $value.text(count + '.0');
+            for (var i = 0; i < count; i++) {
+                var star = elements[i];
+                __WEBPACK_IMPORTED_MODULE_0_jquery___default()(star).addClass('hover');
+            }
+        }
+    },
+    starClick: function starClick(e) {
+        var $star = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(e.currentTarget);
+        var urlItems = document.location.href.split('/').reverse();
+        var postId = urlItems[0];
+        var pathName = document.location.pathname + '/assessment';
+        console.log(pathName);
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default.a.ajax(pathName, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': __WEBPACK_IMPORTED_MODULE_0_jquery___default()('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                assessment: $star.data('id'),
+                postId: postId
+            }
         });
-      }
+    },
+    checkScroll: function checkScroll() {
+        if (__WEBPACK_IMPORTED_MODULE_0_jquery___default()('.j-panel-end').length) {
+            var hT = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.j-panel-end').offset().top,
+                hH = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.j-panel-end').outerHeight(),
+                wH = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).height(),
+                wS = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(this).scrollTop();
+            if (wS > hT + hH - wH) {
+                __WEBPACK_IMPORTED_MODULE_0_jquery___default.a.ajax({
+                    type: 'POST',
+                    data: 'da',
+                    headers: {
+                        'X-CSRF-TOKEN': __WEBPACK_IMPORTED_MODULE_0_jquery___default()('meta[name="csrf-token"]').attr('content')
+                    }
+                }).done(function (data) {
+                    console.log('suc');
+                    console.log(data);
+                }).fail(function (data) {
+                    console.log('fail');
+                    console.log(data);
+                });
+            }
+        }
+    },
+    handleMethod: function handleMethod(e) {
+        var link = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(this);
+        var httpMethod = link.data('method').toUpperCase();
+        var form;
+
+        // If the data-method attribute is not PUT or DELETE,
+        // then we don't know what to do. Just ignore.
+        if (__WEBPACK_IMPORTED_MODULE_0_jquery___default.a.inArray(httpMethod, ['PUT', 'DELETE']) === -1) {
+            return;
+        }
+
+        // Allow user to optionally provide data-confirm="Are you sure?"
+        if (link.data('confirm')) {
+            if (!laravel.verifyConfirm(link)) {
+                return false;
+            }
+        }
+
+        form = laravel.createForm(link);
+        form.submit();
+
+        e.preventDefault();
+    },
+
+    verifyConfirm: function verifyConfirm(link) {
+        return confirm(link.data('confirm'));
+    },
+
+    createForm: function createForm(link) {
+        var form = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<form>', {
+            'method': 'POST',
+            'action': link.attr('href')
+        });
+
+        var token = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<input>', {
+            'type': 'hidden',
+            'name': '_token',
+            'value': link.data('token')
+        });
+
+        var hiddenInput = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<input>', {
+            'name': '_method',
+            'type': 'hidden',
+            'value': link.data('method')
+        });
+
+        return form.append(token, hiddenInput).appendTo('body');
     }
-  },
-  handleMethod: function handleMethod(e) {
-    var link = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(this);
-    var httpMethod = link.data('method').toUpperCase();
-    var form;
-
-    // If the data-method attribute is not PUT or DELETE,
-    // then we don't know what to do. Just ignore.
-    if (__WEBPACK_IMPORTED_MODULE_0_jquery___default.a.inArray(httpMethod, ['PUT', 'DELETE']) === -1) {
-      return;
-    }
-
-    // Allow user to optionally provide data-confirm="Are you sure?"
-    if (link.data('confirm')) {
-      if (!laravel.verifyConfirm(link)) {
-        return false;
-      }
-    }
-
-    form = laravel.createForm(link);
-    form.submit();
-
-    e.preventDefault();
-  },
-
-  verifyConfirm: function verifyConfirm(link) {
-    return confirm(link.data('confirm'));
-  },
-
-  createForm: function createForm(link) {
-    var form = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<form>', {
-      'method': 'POST',
-      'action': link.attr('href')
-    });
-
-    var token = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<input>', {
-      'type': 'hidden',
-      'name': '_token',
-      'value': link.data('token')
-    });
-
-    var hiddenInput = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<input>', {
-      'name': '_method',
-      'type': 'hidden',
-      'value': link.data('method')
-    });
-
-    return form.append(token, hiddenInput).appendTo('body');
-  }
 };
 
 laravel.initialize();

@@ -24,11 +24,18 @@ class SetShownPost
             $url      = $request->url();
             $urlItems = array_reverse(explode('/', $url));
             $postId   = null;
+            // просмотр статьи
             if ($urlItems[1] === 'posts') {
                 $postId = $urlItems[0];
+                $value = 4;
+                // прочтение статьи
+                if ($request->method() === 'POST') {
+                    $value = 6;
+                }
             }
-            $value = 4;
-            if ($request->method() === 'POST') {
+            // комментарий к статье
+            if ($urlItems[0] === 'comment') {
+                $postId = $urlItems[1];
                 $value = 8;
             }
             if ($id && $postId) {

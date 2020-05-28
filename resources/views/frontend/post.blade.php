@@ -25,6 +25,7 @@
                                 <span class="label label-danger">No tag found.</span>
                             @endforelse
                         </p>
+                        @includeWhen(Auth::user(), 'frontend._assessment')
                     </div>
                     <div class="panel-end j-panel-end" />
                 </div>

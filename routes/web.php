@@ -14,7 +14,8 @@
 Route::get('/', 'BlogController@index')->middleware('getRecomendationPosts');
 Route::get('/posts/{post}', 'BlogController@post')->middleware('setShownPost');
 Route::post('/posts/{post}', 'BlogController@sendShownPost')->middleware('setShownPost');
-Route::post('/posts/{post}/comment', 'BlogController@comment')->middleware('auth');
+Route::post('/posts/{post}/assessment', 'BlogController@sendAssessmentPost');
+Route::post('/posts/{post}/comment', 'BlogController@comment')->middleware('auth')->middleware('setShownPost');
 
 Auth::routes();
 

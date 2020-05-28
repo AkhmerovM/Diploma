@@ -18,7 +18,50 @@ var laravel = {
      this.methodLinks.on('click', this.handleMethod);
        $(window).scroll(_.debounce(this.checkScroll, 1000));
        $(document).ready(this.checkScroll);
+       $(document)
+           .off('click')
+           .on('click', '.star-svg__svg', this.starClick);
+       $('.star-svg')
+           .off('mouseover')
+           .on('mouseover', this.starMove)
+           .off('mouseleave')
+           .on('mouseout', this.starMove)
    },
+    starMove: function(e) {
+       const $target = $(e.target);
+       const $container = $('.star-svg');
+        const elements = $container.children();
+        if ($target.hasClass('star-svg__svg')) {
+            elements.each(function(element) {
+                $(elements[element]).removeClass('hover');
+            });
+            const count = $target.data('id');
+            const $value = $('.star-svg__value');
+            $value.text(`${count}.0`);
+            for (let i = 0; i < count; i++) {
+                let star = elements[i];
+                $(star).addClass('hover');
+            }
+        }
+    },
+    starClick: function(e) {
+        const $star = $(e.currentTarget);
+        const urlItems = document.location.href.split('/').reverse();
+        const postId = urlItems[0];
+        const pathName = `${document.location.pathname}/assessment`;
+        console.log(pathName);
+        $.ajax(pathName,{
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+            data: {
+                assessment: $star.data('id'),
+                postId: postId,
+            }
+        })
+
+    },
     checkScroll: function() {
         if ($('.j-panel-end').length) {
             var hT = $('.j-panel-end').offset().top,

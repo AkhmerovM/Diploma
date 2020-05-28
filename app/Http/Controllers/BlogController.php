@@ -7,6 +7,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use predictionio\EngineClient;
+use predictionio\EventClient;
 
 class BlogController extends Controller
 {
@@ -85,5 +86,25 @@ class BlogController extends Controller
         flash()->overlay('Comment successfully created');
 
         return redirect("/posts/{$post->id}");
+    }
+    public function sendAssessmentPost(Request $request, Post $post)
+    {
+        $value  = $request->assessment * 2;
+        $postId = $request->postId;
+        $client = new EventClient('lMIAHhBrJBBL7owDaivnBTlJcVUGGWVmH7-e0ZVXlttMZWy0lLE7mpblqn1LcW-l', 'http://0.0.0.0:7070/');
+        if (Auth::check()) {
+            $id = Auth::id();
+            if ($id && $postId) {
+                $response = $client->createEvent([
+                    'event'            => 'rate',
+                    'entityType'       => 'user',
+                    'entityId'         => $id,
+                    'targetEntityType' => 'item',
+                    'targetEntityId'   => $postId,
+                    'properties'       => ['rating' => $value]
+                ]);
+            }
+        }
+        return [$postId, $value];
     }
 }
